@@ -1,0 +1,4 @@
+ID,driverLicense,email,firstName,lastName,phone,address
+"CUST001","DL12345","alice@example.com","Alice","Miller","123456789","Street 1, Berlin"
+"CUST002","DL67890","bob@example.com","Bob","Schneider","987654321","Street 20, Hamburg"
+"CUST003","DL11223","charlie@example.com","Charlie","Khan","555123444","Street 5, Munich"
