@@ -21,7 +21,7 @@
         "type": "OData",
         "settings": {
           "annotations": [],
-          "odataVersion": "4.01"
+          "odataVersion": "4.0"
         }
       }
     }
@@ -130,12 +130,7 @@
               "editableHeaderContent": false,
               "contextPath": "/Cars",
               "controlConfiguration": {
-                "@com.sap.vocabularies.UI.v1.HeaderFacets#dailyPrice": {
-                  "visible": "{= !${$ui>/editable} && ${IsActiveEntity} }"
-                },
-                "@com.sap.vocabularies.UI.v1.HeaderFacets#status_code": {
-                  "visible": "{= !${$ui>/editable} && ${IsActiveEntity} }"
-                }
+               
               }
             }
           }

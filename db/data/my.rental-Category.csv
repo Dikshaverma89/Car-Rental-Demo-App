@@ -1,3 +1,9 @@
 code,name
 "SED","Sedan"
 "SUV","Crossover / SUV"
+"LUX","Luxury"
+"CMP","Compact"
+"ELC","Electric"
+"VAN","Van"
+"SPT","Sports"
+"TRK","Truck"

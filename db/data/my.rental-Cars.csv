@@ -1,6 +1,8 @@
 licensePlate,brand,model,year,dailyPrice,category_code
 "CAR-1001","Toyota","Corolla",2020,45.00,"SED"
-"CAR-1002","Honda","Civic",2021,50.00,"SED"
+"CAR-1002","Honda","Civic",2021,50.00,"CMP"
 "CAR-1003","BMW","X3",2019,90.00,"SUV"
-"CAR-1004","Audi","A4",2022,85.00,"SED"
+"CAR-1004","Audi","A4",2022,85.00,"LUX"
 "CAR-1005","Kia","Sportage",2020,60.00,"SUV"
+"CAR-1006","Mercedes","C-Class",2021,95.00,"LUX"
+"CAR-1007","Ford","Focus",2018,40.00,"CMP"

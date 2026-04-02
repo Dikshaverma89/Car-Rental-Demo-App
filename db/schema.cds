@@ -1,59 +1,107 @@
 namespace my.rental;
 
 using { cuid } from '@sap/cds/common';
-using { my.rental.HasPeriod } from './aspects';
 
+// =============================================================================
+// REUSABLE ASPECT: DateRange
+// Reused by both Rentals and Maintenance to avoid repeating startDate/endDate
+// =============================================================================
+aspect DateRange {
+  startDate : Date @mandatory;
+  endDate   : Date @mandatory;
+}
 
-
-/** Master data: Category (Sedan, SUV, ...) */
 entity Category {
-  key code : String(10);
-  name     : String(100);
+  key code : String(20);
+      name : String(50);
 }
 
-/** Master data: Availability status (Available, Rented, Under Maintenance) */
+// =============================================================================
+// ENTITY: AvailabilityStatus  (value list — e.g. Available, Rented, Under Maintenance)
+// criticality values used by Fiori for semantic colouring:
+//   3 = green  (Available)
+//   2 = yellow (Rented)
+//   1 = red    (Under Maintenance)
+// =============================================================================
 entity AvailabilityStatus {
-  key code        : String(2);
-  name            : String(40);
-  criticality     : Integer; // 1: green (Available), 2: yellow (Rented), 3: red (UM)
+  key code        : String(5);
+      name        : String(50);
+      criticality : Integer;
 }
 
-/** Customers (use ID:String(10) as requested) */
-entity Customers {
-  key ID            : String(10);
-  driverLicense     : String(40);  // unique (validated in service)
-  email             : String(100); // unique (validated in service)
-  firstName         : String(50);
-  lastName          : String(50);
-  phone             : String(30);
-  address           : String(200);
-}
-
-/** Cars */
+// =============================================================================
+// ENTITY: Cars
+// Key       : licensePlate (natural business key)
+// Relations : belongs to one Category
+//             has many Rentals      (composition — Rentals owned by Car)
+//             has many Maintenance  (composition — Maintenance owned by Car)
+// =============================================================================
 entity Cars {
   key licensePlate : String(20);
-  brand            : String(60);
-  model            : String(60);
-  year             : Integer;
-  dailyPrice       : Decimal(9,2);
-  category         : Association to Category not null;
+      brand        : String(50)    @mandatory;
+      model        : String(50)    @mandatory;
+      year         : Integer       @mandatory;
+      dailyPrice   : Decimal(10,2) @mandatory;
 
-  // Compositions to enable nested tables on Object Page
-  rentals     : Composition of many Rentals     on rentals.car = $self;
-  maintenance : Composition of many Maintenance on maintenance.car = $self;
+      category_code : String(20);
+      // association uses category_code as FK
+      category      : Association to Category
+                         on category.code = category_code @mandatory;
+      rentals      : Composition of many Rentals
+                       on rentals.car = $self;
+      // One Car has many Maintenance records
+      maintenance  : Composition of many Maintenance
+                       on maintenance.car = $self;
 }
 
-/** Rentals (use cuid + Period aspect) */
-entity Rentals : cuid, HasPeriod {
-  // ID comes from cuid
-  totalPrice : Decimal(13,2)  @Core.Computed; // computed in service logic
-  customer   : Association to Customers not null;
-  car        : Association to Cars      not null;
+// =============================================================================
+// ENTITY: Customers
+// Key       : ID — String(10) business key (e.g. CUST001)
+// Unique    : driverLicense, email
+// Relations : has many Rentals (back-association for navigation)
+// =============================================================================
+entity Customers {
+  key ID            : String(10);
+      driverLicense : String(30)  @mandatory  @assert.unique;
+      email         : String(100) @mandatory  @assert.unique;
+      firstName     : String(50)  @mandatory;
+      lastName      : String(50)  @mandatory;
+      phone         : String(20);
+      address       : String(200);
+      // One Customer has many Rentals
+      rentals       : Association to many Rentals
+                        on rentals.customer = $self;
 }
 
-/** Maintenance (use cuid + Period aspect) */
-entity Maintenance : cuid, HasPeriod {
-  description : String(200) not null;
-  cost        : Decimal(13,2) not null;
-  car         : Association to Cars not null;
+// =============================================================================
+// ENTITY: Rentals
+// Key       : ID — auto-generated UUID via cuid aspect
+// Aspect    : DateRange — adds startDate and endDate fields
+// Virtual   : totalPrice — calculated in JS handler (days × dailyPrice)
+//             not stored as a real column, computed on READ
+// Relations : belongs to one Customer (required)
+//             belongs to one Car      (required)
+// =============================================================================
+entity Rentals : cuid, DateRange {
+  // Virtual field — not persisted in DB, calculated in service handler
+  // @Core.Computed tells Fiori this field is read-only and auto-calculated
+  totalPrice : Decimal(10,2) @Core.Computed: true;
+  // Many Rentals belong to one Customer
+  customer   : Association to Customers @mandatory;
+  // Many Rentals belong to one Car
+  car        : Association to Cars @mandatory;
+}
+
+// =============================================================================
+// ENTITY: Maintenance
+// Key       : ID — auto-generated UUID via cuid aspect
+// Aspect    : DateRange — adds startDate and endDate fields
+// Relations : belongs to one Car (required)
+// =============================================================================
+entity Maintenance : cuid, DateRange {
+  description : String(500)    @mandatory;
+  cost        : Decimal(10,2)  @mandatory;
+
+  // Many Maintenance records belong to one Car
+  car         : Association to Cars @mandatory;
 }
