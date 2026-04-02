@@ -1,7 +1,3 @@
-// =============================================================================
-// srv/annotations.cds
-// Car Rental – UI Annotations for Fiori Elements
-// =============================================================================
 
 using MainService as service from '../../srv/service';
 
@@ -144,7 +140,7 @@ annotate service.Cars with @(
             ID    : 'dailyPrice',
             Target: '@UI.DataPoint#dailyPrice',
             //  CHANGED: was UI.Hidden: {$Path: 'IsActiveEntity'}
-            // That syntax ALWAYS hides the facet (IsActiveEntity=true in display mode)
+            // (IsActiveEntity=true in display mode)
             // Correct: hide when NOT active (i.e. in edit/draft mode)
             // ![@UI.Hidden] with $Ne means: hidden when IsActiveEntity != true
             ![@UI.Hidden]: { $edmJson: { $Ne: [ { $Path: 'IsActiveEntity' }, true ] } }
@@ -174,8 +170,7 @@ annotate service.Cars with @(
     ],
 
     // Side Effects – refresh status + tables after rent or setToMaintenance
-    
- 
+  
 /*
     UI.SideEffects #AfterMaintenance: {
         TriggerActions  : [ 'MainService.Cars_setToMaintenance' ],
@@ -239,9 +234,7 @@ annotate service.Cars with {
     )
 };
 
-
 // RENTALS – Object Page table columns
-
 annotate service.Rentals with @(
     
     UI.LineItem #RentalsInfo: [
