@@ -129,22 +129,36 @@
             "settings": {
               "editableHeaderContent": false,
               "contextPath": "/Cars",
-              "controlConfiguration": {
-               
+              "controlConfiguration": {},
+              "content": {
+                "header": {
+                  "actions": {
+                    "CustomRent": {
+                      "press": "cars.info.cars.ext.RentDialog.onRentPress",
+                      "text": "Rent",
+                      "visible": "{= ${IsActiveEntity} === true }",
+                      "position": {
+                        "placement": "Before",
+                        "anchor": "DataFieldForAction::MainService.setToMaintenance"
+                      }
+                    }
+                  }
+                }
               }
             }
           }
         }
       }
     }
-  },
-  "sap.fiori": {
-    "registrationIds": [],
-    "archeType": "transactional"
-  },
-  "sap.fe": {
-    "app": {
-      "enableLazyLoading": true
-    }
+  
+},
+"sap.fiori": {
+  "registrationIds": [],
+  "archeType": "transactional"
+},
+"sap.fe": {
+  "app": {
+    "enableLazyLoading": true
   }
+}
 }

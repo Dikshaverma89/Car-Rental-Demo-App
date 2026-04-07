@@ -2,11 +2,11 @@ const cds = require('@sap/cds')
 
 module.exports = cds.service.impl(function () {
 
-  const { Cars, Rentals, Maintenance, Customers, Category } = this.entities
+  const { Configuration, Cars, Rentals, Maintenance, Customers, Category } = this.entities
 
   // DATE VALIDATION                       
   const validateDates = (start, end, req) => {
-   
+
     if (!start || !end) {
       req.reject(400, "Start and End date are required")
     }
@@ -24,27 +24,27 @@ module.exports = cds.service.impl(function () {
   /* Accepts optional excludeId for UPDATE */
   /* ===================================== */
   const checkOverlap = async (car_licensePlate, start, end, req, excludeId = null) => {
-   
+
     // Build rental overlap query
     const rentalWhere = {
       car_licensePlate,
       startDate: { '<=': end },
-      endDate:   { '>=': start }
+      endDate: { '>=': start }
     }
 
     // Build maintenance overlap query
     const maintWhere = {
       car_licensePlate,
       startDate: { '<=': end },
-      endDate:   { '>=': start }
+      endDate: { '>=': start }
     }
 
-    let rental      = await SELECT.one.from(Rentals).where(rentalWhere)
+    let rental = await SELECT.one.from(Rentals).where(rentalWhere)
     let maintenance = await SELECT.one.from(Maintenance).where(maintWhere)
 
     // For UPDATE: exclude the record being updated from the overlap check
     if (excludeId) {
-      if (rental      && rental.ID      === excludeId) rental      = null
+      if (rental && rental.ID === excludeId) rental = null
       if (maintenance && maintenance.ID === excludeId) maintenance = null
     }
 
@@ -129,8 +129,8 @@ module.exports = cds.service.impl(function () {
     const existing = await SELECT.one.from(Rentals).where({ ID: req.params[0] })
     if (!existing) return
 
-    const startDate        = req.data.startDate        ?? existing.startDate
-    const endDate          = req.data.endDate          ?? existing.endDate
+    const startDate = req.data.startDate ?? existing.startDate
+    const endDate = req.data.endDate ?? existing.endDate
     const car_licensePlate = req.data.car_licensePlate ?? existing.car_licensePlate
 
     validateDates(startDate, endDate, req)
@@ -149,14 +149,35 @@ module.exports = cds.service.impl(function () {
     const existing = await SELECT.one.from(Maintenance).where({ ID: req.params[0] })
     if (!existing) return
 
-    const startDate        = req.data.startDate        ?? existing.startDate
-    const endDate          = req.data.endDate          ?? existing.endDate
+    const startDate = req.data.startDate ?? existing.startDate
+    const endDate = req.data.endDate ?? existing.endDate
     const car_licensePlate = req.data.car_licensePlate ?? existing.car_licensePlate
 
     validateDates(startDate, endDate, req)
 
     // Pass existing.ID so the overlap check ignores this record itself
     await checkOverlap(car_licensePlate, startDate, endDate, req, existing.ID)
+  })
+
+  //CONFIGURATION SINGLETON            
+  // Returns Current User Info
+  this.on('READ', 'Configuration', req => {
+    return {
+      ID: 'singleton',
+      userId: req.user.id,
+      isAdmin: req.user.is('admin')
+    }
+  })
+  // POPULATE isAdmin VIRTUAL FIELD     
+  // Runs after every Cars READ         
+  // Fiori uses this for UI hiding   
+  this.after('READ', Cars, (data, req) => {
+    const isAdmin = req.user.is('admin') === true ? true : false
+    if (Array.isArray(data)) {
+      data.forEach(car => car.isAdmin = isAdmin)
+    } else if (data) {
+      data.isAdmin = isAdmin
+    }
   })
 
   /* ===================================== */
@@ -167,7 +188,11 @@ module.exports = cds.service.impl(function () {
     console.log(" ===== RENT ACTION TRIGGERED =====")
 
     const car_licensePlate = req.params[0].licensePlate
-    const { startDate, endDate, customer_ID } = req.data   
+    //const { startDate, endDate } = req.data
+    startDate = req.data.startDate
+    const endDate = req.data.endDate
+
+    const customer_ID = req.user.is('admin') ? req.data.customer_ID : req.user.id
 
     console.log(" Car License Plate : ", car_licensePlate)
     console.log("Req Data in On rent handler : ", req.data)
@@ -193,7 +218,7 @@ module.exports = cds.service.impl(function () {
 
     //  Calculate totalPrice = number of days (inclusive) × dailyPrice
     const MS_PER_DAY = 1000 * 60 * 60 * 24
-    const days       = Math.ceil((new Date(endDate) - new Date(startDate)) / MS_PER_DAY) + 1
+    const days = Math.ceil((new Date(endDate) - new Date(startDate)) / MS_PER_DAY) + 1
     const totalPrice = days * car.dailyPrice
     console.log(` ${days} days × ${car.dailyPrice} = ${totalPrice}`)
 
@@ -201,8 +226,8 @@ module.exports = cds.service.impl(function () {
       startDate,
       endDate,
       totalPrice,
-      customer_ID,                    
-      car_licensePlate                
+      customer_ID,
+      car_licensePlate
     })
 
     //  Return the newly created rental record
@@ -249,7 +274,7 @@ module.exports = cds.service.impl(function () {
       endDate,
       description,
       cost,
-      car_licensePlate                  
+      car_licensePlate
     })
 
     //  Return the newly created maintenance record
@@ -279,8 +304,8 @@ module.exports = cds.service.impl(function () {
       if (!car) return
 
       const MS_PER_DAY = 1000 * 60 * 60 * 24
-      const days       = Math.ceil((new Date(r.endDate) - new Date(r.startDate)) / MS_PER_DAY) + 1
-      r.totalPrice     = days * car.dailyPrice
+      const days = Math.ceil((new Date(r.endDate) - new Date(r.startDate)) / MS_PER_DAY) + 1
+      r.totalPrice = days * car.dailyPrice
 
       console.log(`Rental ${r.ID} → ${days} days → ${r.totalPrice}`)
     }

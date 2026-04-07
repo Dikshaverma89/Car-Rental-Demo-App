@@ -1,0 +1,15 @@
+code,name,brandCode
+BMW_X5,X5,BMW
+BMW_3,3 Series,BMW
+BMW_5,5 Series,BMW
+MERC_C,C-Class,Mercedes-Benz
+MERC_E,E-Class,Mercedes-Benz
+MERC_GLE,GLE,Mercedes-Benz
+TOYOTA_CAMRY,Camry,Toyota
+TOYOTA_RAV4,RAV4,Toyota
+VW_GOLF,Golf,Volkswagen
+VW_PASSAT,Passat,Volkswagen
+AUDI_A4,A4,Audi
+AUDI_Q5,Q5,Audi
+FORD_FOCUS,Focus,Ford
+FORD_MUSTANG,Mustang,Ford

@@ -4,7 +4,12 @@
   "description": "A simple CAP project.",
   "dependencies": {
     "@sap/cds": "^9",
-    "express": "^4"
+    "express": "^4",
+    "passport": "^0.7.0",
+    "passport-http": "^0.3.0",
+    "@sap-cloud-sdk/connectivity": "^4",
+    "@sap-cloud-sdk/http-client": "^4",
+    "@sap-cloud-sdk/resilience": "^4"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^2",
@@ -13,6 +18,55 @@
   "scripts": {
     "start": "cds-serve",
     "watch-cars": "cds watch --open cars.info.cars/index.html?sap-ui-xx-viewCache=false --livereload false"
+  },
+  "cds": {
+    "requires": {
+      "auth": {
+        "kind": "basic",
+        "users": {
+          "admin": {
+            "password": "admin",
+            "roles": [
+              "admin"
+            ]
+          },
+          "Cust001": {
+            "password": "Cust001",
+            "roles": [
+              "user"
+            ]
+          },
+          "Cust002": {
+            "password": "Cust002",
+            "roles": [
+              "user"
+            ]
+          },
+          "Cust003": {
+            "password": "Cust003",
+            "roles": [
+              "user"
+            ]
+          },
+          "Cust004": {
+            "password": "Cust004",
+            "roles": [
+              "user"
+            ]
+          },
+          "Cust005": {
+            "password": "Cust005",
+            "roles": [
+              "user"
+            ]
+          }
+        }
+      },
+      "S4VehicleCatalog": {
+        "kind": "odata",
+        "model": "srv/external/S4VehicleCatalog"
+      }
+    }
   },
   "private": true,
   "workspaces": [

@@ -1,0 +1,59 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <Dialog
+        id="rentDialog"
+        title="Rent Car"
+        contentWidth="400px">
+
+        <content>
+            <VBox id="rentVBox" class="sapUiSmallMargin">
+
+                <!-- DATE RANGE -->
+                <Label
+                    id="dateLabel"
+                    text="Date Range"
+                    required="true"/>
+
+                <DateRangeSelection
+                    id="dateRange"
+                    displayFormat="yyyy-MM-dd"
+                    valueFormat="yyyy-MM-dd"
+                    placeholder="Select start and end date"
+                    width="100%"/>
+
+                <!-- CUSTOMER -->
+                <Label
+                    id="customerLabel"
+                    text="Customer ID"
+                    visible="{rentModel>/isAdmin}"/>
+
+                <Input
+                    id="customerInput"
+                    value="{rentModel>/customer_ID}"
+                    placeholder="Enter Customer ID"
+                    visible="{rentModel>/isAdmin}"
+                    width="100%"/>
+
+            </VBox>
+        </content>
+
+        <beginButton>
+            <Button
+                id="rentConfirmBtn"
+                text="Rent"
+                type="Emphasized"
+                press=".onRentConfirm"/>
+        </beginButton>
+
+        <endButton>
+            <Button
+                id="rentCancelBtn"
+                text="Cancel"
+                press=".onRentCancel"/>
+        </endButton>
+
+    </Dialog>
+
+</core:FragmentDefinition>

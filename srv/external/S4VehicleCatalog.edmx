@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:DataServices>
+    <Schema Namespace="S4VehicleCatalog" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+
+      <EntityType Name="VehicleBrand">
+        <Key>
+          <PropertyRef Name="code"/>
+        </Key>
+        <Property Name="code"  Type="Edm.String" MaxLength="20" Nullable="false"/>
+        <Property Name="name"  Type="Edm.String" MaxLength="100"/>
+      </EntityType>
+
+      <EntityType Name="VehicleModel">
+        <Key>
+          <PropertyRef Name="code"/>
+        </Key>
+        <Property Name="code"      Type="Edm.String" MaxLength="20" Nullable="false"/>
+        <Property Name="name"      Type="Edm.String" MaxLength="100"/>
+        <Property Name="brandCode" Type="Edm.String" MaxLength="20"/>
+      </EntityType>
+
+      <EntityContainer Name="EntityContainer">
+        <EntitySet Name="VehicleBrands" EntityType="S4VehicleCatalog.VehicleBrand"/>
+        <EntitySet Name="VehicleModels" EntityType="S4VehicleCatalog.VehicleModel"/>
+      </EntityContainer>
+
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
