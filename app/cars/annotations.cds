@@ -177,32 +177,31 @@ annotate service.Cars with @(
     ],
 
     UI.Identification          : [
-        /*{
-            $Type        : 'UI.DataFieldForAction',
-            Action       : 'MainService.rent',
-            Label        : '{i18n>Rent}',
-            ![@UI.Hidden]: {$edmJson: {$Ne: [
+                                  /*{
+                                      $Type        : 'UI.DataFieldForAction',
+                                      Action       : 'MainService.rent',
+                                      Label        : '{i18n>Rent}',
+                                      ![@UI.Hidden]: {$edmJson: {$Ne: [
+                                          {$Path: 'IsActiveEntity'},
+                                          true
+                                      ]}}
+                                  }, */
+                                 {
+        $Type        : 'UI.DataFieldForAction',
+        Action       : 'MainService.setToMaintenance',
+        Label        : '{i18n>SetToMaintenance}',
+        //  Hide in edit mode OR when not admin
+        ![@UI.Hidden]: {$edmJson: {$Or: [
+            {$Ne: [
                 {$Path: 'IsActiveEntity'},
                 true
-            ]}}
-        }, */
-        {
-            $Type        : 'UI.DataFieldForAction',
-            Action       : 'MainService.setToMaintenance',
-            Label        : '{i18n>SetToMaintenance}',
-            //  Hide in edit mode OR when not admin
-            ![@UI.Hidden]: {$edmJson: {$Or: [
-                {$Ne: [
-                    {$Path: 'IsActiveEntity'},
-                    true
-                ]},
-                {$Ne: [
-                    {$Path: 'isAdmin'},
-                    true
-                ]}
-            ]}}
-        },
-    ]
+            ]},
+            {$Ne: [
+                {$Path: 'isAdmin'},
+                true
+            ]}
+        ]}}
+    }, ]
 );
 
 // CARS – Value Help: category_code (dialog with table)
@@ -371,6 +370,7 @@ annotate service.Cars with @(
         TargetProperties: ['status_code'],
         TargetEntities  : [
             {$NavigationPropertyPath: 'rentals'},
+            {$NavigationPropertyPath: 'maintenance'},
             {$NavigationPropertyPath: 'status'}
         ]
     },
@@ -388,62 +388,65 @@ annotate service.Cars with @(
 // Brand value help
 // Brand value help
 annotate service.Cars with {
-  brand @(
-    Common.Label: 'Brand',
-    Common.ValueList: {
-      $Type         : 'Common.ValueListType',
-      CollectionPath: 'CarBrands',
-      Parameters    : [
-        {
-          // output name into brand field
-          $Type            : 'Common.ValueListParameterOut',
-          LocalDataProperty: brand,
-          ValueListProperty: 'name',  // ← name not code
+    brand @(
+        Common.Label                   : 'Brand',
+        Common.ValueList               : {
+            $Type         : 'Common.ValueListType',
+            CollectionPath: 'CarBrands',
+            Parameters    : [
+                {
+                    // output name into brand field
+                    $Type            : 'Common.ValueListParameterOut',
+                    LocalDataProperty: brand,
+                    ValueListProperty: 'name',
+                    // ← name not code
+                },
+                {
+                    // show code in dialog
+                    $Type            : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty: 'code',
+                },
+                {
+                    // show name in dialog
+                    $Type            : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty: 'name',
+                },
+            ],
         },
-        {
-          // show code in dialog
-          $Type            : 'Common.ValueListParameterDisplayOnly',
-          ValueListProperty: 'code',
-        },
-        {
-          // show name in dialog
-          $Type            : 'Common.ValueListParameterDisplayOnly',
-          ValueListProperty: 'name',
-        },
-      ],
-    },
-    Common.ValueListWithFixedValues: false,
-  )
+        Common.ValueListWithFixedValues: false,
+    )
 };
+
 // Model value help — filters by brand + writes brand back
 annotate service.Cars with {
-  model @(
-    Common.Label: 'Model',
-    Common.ValueList: {
-      $Type         : 'Common.ValueListType',
-      CollectionPath: 'CarModels',
-      Parameters    : [
-        {
-          $Type            : 'Common.ValueListParameterInOut',
-          LocalDataProperty: brand,
-          ValueListProperty: 'brandName',  // ← brandName ↔ brand
+    model @(
+        Common.Label                   : 'Model',
+        Common.ValueList               : {
+            $Type         : 'Common.ValueListType',
+            CollectionPath: 'CarModels',
+            Parameters    : [
+                {
+                    $Type            : 'Common.ValueListParameterInOut',
+                    LocalDataProperty: brand,
+                    ValueListProperty: 'brandName',
+                    // ← brandName ↔ brand
+                },
+                {
+                    $Type            : 'Common.ValueListParameterOut',
+                    LocalDataProperty: model,
+                    ValueListProperty: 'name',
+                },
+                {
+                    $Type            : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty: 'code',
+                },
+                {
+                    // 🆕 show brandName in dialog
+                    $Type            : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty: 'brandName',
+                },
+            ],
         },
-        {
-          $Type            : 'Common.ValueListParameterOut',
-          LocalDataProperty: model,
-          ValueListProperty: 'name',
-        },
-        {
-          $Type            : 'Common.ValueListParameterDisplayOnly',
-          ValueListProperty: 'code',
-        },
-        {
-          // 🆕 show brandName in dialog
-          $Type            : 'Common.ValueListParameterDisplayOnly',
-          ValueListProperty: 'brandName',
-        },
-      ],
-    },
-    Common.ValueListWithFixedValues: false,
-  )
+        Common.ValueListWithFixedValues: false,
+    )
 };

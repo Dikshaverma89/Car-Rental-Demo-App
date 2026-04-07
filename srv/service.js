@@ -237,9 +237,56 @@ module.exports = cds.service.impl(function () {
       startDate,
       endDate
     })
+    // 🆕 emit Rental.Created event
+    await this.emit('Rental.Created', created)
 
     console.log("✅ RENT SUCCESS:", created)
     return created
+  })
+
+  /* ===================================== */
+  /* 🆕 EVENT: Rental.Created              */
+  /* Auto-maintenance after 10 rentals     */
+  /* ===================================== */
+  this.on('Rental.Created', async event => {
+    const rental = event.data
+    console.log("📅 Rental.Created event:", rental)
+
+    // count rentals for this car in last 12 months
+    const twelveMonthsAgo = new Date()
+    twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1)
+    const fromDate = twelveMonthsAgo.toISOString().split('T')[0]
+
+    const rentals = await SELECT.from(Rentals).where({
+      car_licensePlate: rental.car_licensePlate,
+      startDate: { '>=': fromDate }
+    })
+
+    console.log(`🔢 Rentals in last 12 months: ${rentals.length}`)
+
+    if (rentals.length >= 3) {
+      console.log("⚠️ High usage — creating auto maintenance")
+
+      // start day after rental ends
+      const start = new Date(rental.endDate)
+      start.setDate(start.getDate() + 1)
+      const startDate = start.toISOString().split('T')[0]
+
+      // 1 day duration
+      const end = new Date(start)
+      end.setDate(end.getDate() + 1)
+      const endDate = end.toISOString().split('T')[0]
+
+      await INSERT.into(Maintenance).entries({
+        startDate,
+        endDate,
+        description: '[Auto] Scheduled maintenance after high usage',
+        cost: 0,
+        car_licensePlate: rental.car_licensePlate
+      })
+
+      console.log("✅ Auto maintenance created:", startDate, "→", endDate)
+    }
   })
 
   /* ===================================== */

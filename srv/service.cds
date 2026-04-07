@@ -112,6 +112,9 @@ service MainService  {
 
 };
 
+// 🆕 Rental.Created event
+event Rental.Created : projection on MainService.Rentals;
+
 //Bound Action
 //Added @restrict per action
 extend MainService.Cars with actions {

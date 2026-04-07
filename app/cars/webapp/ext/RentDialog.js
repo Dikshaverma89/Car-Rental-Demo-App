@@ -37,6 +37,15 @@ sap.ui.define([
                                 return
                             }
 
+                            // 🆕 validate customer ID for admin
+                            const isAdmin     = oDialogModel.getProperty("/isAdmin")
+                            const customer_ID = oDialogModel.getProperty("/customer_ID")
+
+                            if (isAdmin && !customer_ID) {
+                                MessageBox.error("Please enter a Customer ID")
+                                return
+                            }
+                            
                             const fmt = d => d.toISOString().split("T")[0]
 
                             const oAction = oModel.bindContext(
