@@ -38,33 +38,50 @@ sap.ui.define([
                             }
 
                             // 🆕 validate customer ID for admin
-                            const isAdmin     = oDialogModel.getProperty("/isAdmin")
+                            const isAdmin = oDialogModel.getProperty("/isAdmin")
                             const customer_ID = oDialogModel.getProperty("/customer_ID")
 
                             if (isAdmin && !customer_ID) {
                                 MessageBox.error("Please enter a Customer ID")
                                 return
                             }
-                            
-                            const fmt = d => d.toISOString().split("T")[0]
 
+                            //const fmt = d => d.toISOString().split("T")[0]
+                            const fmt = d => {
+                                const year = d.getFullYear()
+                                const month = String(d.getMonth() + 1).padStart(2, '0')
+                                const day = String(d.getDate()).padStart(2, '0')
+                                return `${year}-${month}-${day}`
+                            }
                             const oAction = oModel.bindContext(
                                 "MainService.rent(...)",
                                 oBindingContext
                             )
 
-                            oAction.setParameter("startDate", fmt(startDate))
-                            oAction.setParameter("endDate", fmt(endDate))
+                                                        oAction.setParameter("startDate", fmt(startDate))
+                                                                                    oAction.setParameter("endDate", fmt(endDate))
                             oAction.setParameter(
                                 "customer_ID",
                                 oDialogModel.getProperty("/isAdmin")
                                     ? oDialogModel.getProperty("/customer_ID")
                                     : ""
                             )
-
                             oAction.execute().then(() => {
+                                console.log('[RENT DIALOG] Action executed — refreshing page')
                                 _oDialog.close()
-                                oBindingContext.refresh()
+
+                                // 🆕 request side effects explicitly
+                                oBindingContext.requestSideEffects([
+                                    { $NavigationPropertyPath: 'rentals' },
+                                    { $NavigationPropertyPath: 'status' },
+                                    { $PropertyPath: 'status_code' }
+                                ]).then(() => {
+                                    console.log('[RENT DIALOG] Side effects refreshed')
+                                }).catch(() => {
+                                    // fallback to full refresh
+                                    oBindingContext.refresh()
+                                })
+
                                 MessageBox.success("Car rented successfully!")
                             }).catch(err => {
                                 MessageBox.error(err.message || "Rent failed")
