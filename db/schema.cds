@@ -1,6 +1,6 @@
 namespace my.rental;
 
-using { cuid } from '@sap/cds/common';
+using {cuid} from '@sap/cds/common';
 
 // =============================================================================
 // REUSABLE ASPECT: DateRange
@@ -37,21 +37,22 @@ entity AvailabilityStatus {
 //             has many Maintenance  (composition — Maintenance owned by Car)
 // =============================================================================
 entity Cars {
-  key licensePlate : String(20);
-      brand        : String(50)    @mandatory;
-      model        : String(50)    @mandatory;
-      year         : Integer       @mandatory;
-      dailyPrice   : Decimal(10,2) @mandatory;
+  key licensePlate  : String(20);
+      brand         : String(50)     @mandatory;
+      model         : String(50)     @mandatory;
+      year          : String(4)      @mandatory;
+      dailyPrice    : Decimal(10, 2) @mandatory;
 
       category_code : String(20);
       // association uses category_code as FK
       category      : Association to Category
-                         on category.code = category_code @mandatory;
-      rentals      : Composition of many Rentals
-                       on rentals.car = $self;
+                        on category.code = category_code
+                                     @mandatory;
+      rentals       : Composition of many Rentals
+                        on rentals.car = $self;
       // One Car has many Maintenance records
-      maintenance  : Composition of many Maintenance
-                       on maintenance.car = $self;
+      maintenance   : Composition of many Maintenance
+                        on maintenance.car = $self;
 }
 
 // =============================================================================
@@ -62,10 +63,10 @@ entity Cars {
 // =============================================================================
 entity Customers {
   key ID            : String(10);
-      driverLicense : String(30)  @mandatory  @assert.unique;
-      email         : String(100) @mandatory  @assert.unique;
-      firstName     : String(50)  @mandatory;
-      lastName      : String(50)  @mandatory;
+      driverLicense : String(30)   @mandatory  @assert.unique;
+      email         : String(100)  @mandatory  @assert.unique;
+      firstName     : String(50)   @mandatory;
+      lastName      : String(50)   @mandatory;
       phone         : String(20);
       address       : String(200);
       // One Customer has many Rentals
@@ -85,11 +86,11 @@ entity Customers {
 entity Rentals : cuid, DateRange {
   // Virtual field — not persisted in DB, calculated in service handler
   // @Core.Computed tells Fiori this field is read-only and auto-calculated
-  totalPrice : Decimal(10,2) @Core.Computed: true;
+  totalPrice : Decimal(10, 2)           @Core.Computed: true;
   // Many Rentals belong to one Customer
   customer   : Association to Customers @mandatory;
   // Many Rentals belong to one Car
-  car        : Association to Cars @mandatory;
+  car        : Association to Cars      @mandatory;
 }
 
 // =============================================================================
@@ -99,8 +100,8 @@ entity Rentals : cuid, DateRange {
 // Relations : belongs to one Car (required)
 // =============================================================================
 entity Maintenance : cuid, DateRange {
-  description : String(500)    @mandatory;
-  cost        : Decimal(10,2)  @mandatory;
+  description : String(500)         @mandatory;
+  cost        : Decimal(10, 2)      @mandatory;
 
   // Many Maintenance records belong to one Car
   car         : Association to Cars @mandatory;

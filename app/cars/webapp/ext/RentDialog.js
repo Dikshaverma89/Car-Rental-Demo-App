@@ -9,7 +9,7 @@ sap.ui.define([
 
     return {
 
-        onRentPress: function (oBindingContext, aSelectedContexts, oEventParameters) {
+        onRentPress: function (oBindingContext) {
             console.log("Rent pressed!")
             console.log("oBindingContext:", oBindingContext)
 
@@ -58,8 +58,8 @@ sap.ui.define([
                                 oBindingContext
                             )
 
-                                                        oAction.setParameter("startDate", fmt(startDate))
-                                                                                    oAction.setParameter("endDate", fmt(endDate))
+                            oAction.setParameter("startDate", fmt(startDate))
+                            oAction.setParameter("endDate", fmt(endDate))
                             oAction.setParameter(
                                 "customer_ID",
                                 oDialogModel.getProperty("/isAdmin")
@@ -95,6 +95,12 @@ sap.ui.define([
                 }).then(oDialog => {
                     _oDialog = oDialog
                     _oDialog.setModel(oDialogModel, "rentModel")
+
+                    // 🆕 set minDate after dialog fully rendered
+                    _oDialog.attachAfterOpen(function () {
+                        const oDateRange = sap.ui.getCore().byId("dateRange")
+                        if (oDateRange) oDateRange.setMinDate(new Date())
+                    })
                     _oDialog.open()
                 })
             } else {
@@ -102,8 +108,14 @@ sap.ui.define([
                 if (oDateRange) {
                     oDateRange.setDateValue(null)
                     oDateRange.setSecondDateValue(null)
+                    oDateRange.setMinDate(new Date())
                 }
-                _oDialog.setModel(oDialogModel, "rentModel")
+
+                // 🆕 update existing model — don't replace it
+                const existingModel = _oDialog.getModel("rentModel")
+                existingModel.setProperty("/customer_ID", "")
+                existingModel.setProperty("/isAdmin", isAdmin)
+
                 _oDialog.open()
             }
         }

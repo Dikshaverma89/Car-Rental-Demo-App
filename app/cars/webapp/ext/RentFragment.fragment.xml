@@ -20,7 +20,7 @@
                     id="dateRange"
                     displayFormat="yyyy-MM-dd"
                     valueFormat="yyyy-MM-dd"
-                    placeholder="Select start and end date"
+                    placeholder="Select Start date and End date"
                     width="100%"/>
 
                 <!-- CUSTOMER -->

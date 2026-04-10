@@ -15,9 +15,9 @@ module.exports = cds.service.impl(function () {
     const where = {
       car_licensePlate,
       startDate: { '<=': end },
-      endDate  : { '>=': start }
+      endDate: { '>=': start }
     }
-    const rental      = await SELECT.one.from(Rentals).where(where)
+    const rental = await SELECT.one.from(Rentals).where(where)
     const maintenance = await SELECT.one.from(Maintenance).where(where)
 
     if (rental) {
@@ -32,7 +32,7 @@ module.exports = cds.service.impl(function () {
 
   // ── Car CREATE/UPDATE: validate year, price, category ──
   this.before(['CREATE', 'UPDATE'], Cars, async req => {
-    const { year, dailyPrice, category_code } = req.data
+    const { year, dailyPrice, category_code,brand, model } = req.data
     const currentYear = new Date().getFullYear()
 
     if (year !== undefined && year > currentYear)
@@ -51,6 +51,21 @@ module.exports = cds.service.impl(function () {
         req.reject(400, `Category "${category_code}" does not exist`)
       }
     }
+    // 🆕 Validate model belongs to brand
+    if (brand && model) {
+      const carModel = await SELECT.one
+        .from('MainService.CarModels')
+        .where({
+          brandName: brand,
+          name: model
+        })
+
+      if (!carModel) {
+        console.warn(`[VALIDATION] Model "${model}" does not belong to brand "${brand}"`)
+        req.reject(400, `Model "${model}" does not belong to brand "${brand}"`)
+      }
+    }
+
   })
 
   // ── Block direct POST on Rentals — use rent action instead ──
@@ -68,8 +83,8 @@ module.exports = cds.service.impl(function () {
   // ── Configuration singleton — returns logged-in user info for UI ──
   this.on('READ', 'Configuration', req => {
     return {
-      ID     : 'singleton',
-      userId : req.user.id,
+      ID: 'singleton',
+      userId: req.user.id,
       isAdmin: req.user.is('admin')
     }
   })
@@ -84,9 +99,9 @@ module.exports = cds.service.impl(function () {
   // ── rent action: validate → verify → overlap check → insert → emit event ──
   this.on('rent', 'Cars', async req => {
     const car_licensePlate = req.params[0].licensePlate
-    const startDate        = req.data.startDate
-    const endDate          = req.data.endDate
-    const customer_ID      = req.user.is('admin') ? req.data.customer_ID : req.user.id
+    const startDate = req.data.startDate
+    const endDate = req.data.endDate
+    const customer_ID = req.user.is('admin') ? req.data.customer_ID : req.user.id
 
     console.log(`[RENT] Car: ${car_licensePlate} | Customer: ${customer_ID} | ${startDate} → ${endDate}`)
 
@@ -101,7 +116,7 @@ module.exports = cds.service.impl(function () {
     await checkOverlap(car_licensePlate, startDate, endDate, req)
 
     const MS_PER_DAY = 1000 * 60 * 60 * 24
-    const days       = Math.ceil((new Date(endDate) - new Date(startDate)) / MS_PER_DAY) + 1
+    const days = Math.ceil((new Date(endDate) - new Date(startDate)) / MS_PER_DAY) + 1
     const totalPrice = days * car.dailyPrice
 
     console.log(`[RENT] Total price: ${days} days × ${car.dailyPrice} = ${totalPrice}`)
@@ -137,7 +152,7 @@ module.exports = cds.service.impl(function () {
 
     const rentals = await SELECT.from(Rentals).where({
       car_licensePlate: rental.car_licensePlate,
-      startDate       : { '>=': fromDate }
+      startDate: { '>=': fromDate }
     })
 
     console.log(`[AUTO-MAINTENANCE] Car: ${rental.car_licensePlate} | Rentals in last 12 months: ${rentals.length}`)
@@ -154,8 +169,8 @@ module.exports = cds.service.impl(function () {
       await INSERT.into(Maintenance).entries({
         startDate,
         endDate,
-        description    : '[Auto] Scheduled maintenance after high usage',
-        cost           : 0,
+        description: '[Auto] Scheduled maintenance after high usage',
+        cost: 0,
         car_licensePlate: rental.car_licensePlate
       })
 
@@ -165,7 +180,7 @@ module.exports = cds.service.impl(function () {
 
   // ── setToMaintenance: validate → verify → overlap check → insert ──
   this.on('setToMaintenance', 'Cars', async req => {
-    const car_licensePlate              = req.params[0].licensePlate
+    const car_licensePlate = req.params[0].licensePlate
     const { startDate, endDate, description, cost } = req.data
 
     console.log(`[MAINTENANCE] Car: ${car_licensePlate} | ${startDate} → ${endDate} | Cost: ${cost}`)
@@ -192,8 +207,8 @@ module.exports = cds.service.impl(function () {
       const car = await SELECT.one.from(Cars).where({ licensePlate: r.car_licensePlate })
       if (!car) return
       const MS_PER_DAY = 1000 * 60 * 60 * 24
-      const days       = Math.ceil((new Date(r.endDate) - new Date(r.startDate)) / MS_PER_DAY) + 1
-      r.totalPrice     = days * car.dailyPrice
+      const days = Math.ceil((new Date(r.endDate) - new Date(r.startDate)) / MS_PER_DAY) + 1
+      r.totalPrice = days * car.dailyPrice
     }
     if (Array.isArray(data)) for (const r of data) await calc(r)
     else await calc(data)

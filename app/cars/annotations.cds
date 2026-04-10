@@ -376,7 +376,7 @@ annotate service.Cars with @(
     },
 
     UI.SideEffects #AfterMaintenance: {
-        TriggerActions  : ['MainService.Cars_setToMaintenance'],
+        TriggerActions  : ['MainService.setToMaintenance'],
         TargetProperties: ['status_code'],
         TargetEntities  : [
             {$NavigationPropertyPath: 'maintenance'},
