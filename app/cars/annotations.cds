@@ -253,7 +253,9 @@ annotate service.Cars with {
         },
     )
 };
-
+annotate service.Cars with {
+    isAdmin @UI.Hidden: true;
+}
 // RENTALS – Object Page table columns
 annotate service.Rentals with @(
 
@@ -280,6 +282,14 @@ UI.LineItem #RentalsInfo: [
         Label: '{i18n>TotalPrice}',
     },
 ]);
+
+//Rentals hidden fields
+annotate service.Rentals with {
+    car           @UI.Hidden: true;
+    ID            @UI.Hidden: true;
+    customer      @UI.Hidden: true;
+    customerEmail @UI.Hidden: true;
+}
 
 
 // MAINTENANCE – Object Page table columns
@@ -308,6 +318,12 @@ UI.LineItem #MaintenanceInfo: [
         Label: '{i18n>Cost}',
     },
 ]);
+
+//Maintenance hidden fields
+annotate service.Maintenance with {
+    car @UI.Hidden: true;
+    ID  @UI.Hidden: true;
+}
 
 // ADD these back — they block direct OData POST
 annotate service.Rentals with @Capabilities.InsertRestrictions: {Insertable: false};
@@ -399,18 +415,14 @@ annotate service.Cars with {
                     $Type            : 'Common.ValueListParameterOut',
                     LocalDataProperty: brand,
                     ValueListProperty: 'name',
-                    // ← name not code
+                // ← name not code
                 },
                 {
                     // show code in dialog
                     $Type            : 'Common.ValueListParameterDisplayOnly',
                     ValueListProperty: 'code',
                 },
-                {
-                    // show name in dialog
-                    $Type            : 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty: 'name',
-                },
+
             ],
         },
         Common.ValueListWithFixedValues: false,
@@ -429,7 +441,7 @@ annotate service.Cars with {
                     $Type            : 'Common.ValueListParameterInOut',
                     LocalDataProperty: brand,
                     ValueListProperty: 'brandName',
-                    // ← brandName ↔ brand
+                // ← brandName ↔ brand
                 },
                 {
                     $Type            : 'Common.ValueListParameterOut',
@@ -440,11 +452,7 @@ annotate service.Cars with {
                     $Type            : 'Common.ValueListParameterDisplayOnly',
                     ValueListProperty: 'code',
                 },
-                {
-                    // 🆕 show brandName in dialog
-                    $Type            : 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty: 'brandName',
-                },
+
             ],
         },
         Common.ValueListWithFixedValues: false,
